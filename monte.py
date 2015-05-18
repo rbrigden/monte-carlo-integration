@@ -1,6 +1,8 @@
 import random as rand
 import math
 from decimal import *
+import time
+
 def monte_carlo(function, darts, start, end):
     runs = darts
     points = []
@@ -15,7 +17,7 @@ def monte_carlo(function, darts, start, end):
     for i in range(runs):
         x = a  + rand.random() * (b-a)
         y = rand.random() * height
-        if y < function(x):
+        if y <= function(x):
             points.append([x,y,True])
         else:
             points.append([x,y,False])
@@ -54,5 +56,24 @@ def monte_carlo(function, darts, start, end):
                 y_points_out=y_points_out,
                 integration=area,
                 darts=runs)
+
+def average_error(function, darts, start, end, runs, true_value):
+    sum = 0
+    for i in range(runs):
+        result = monte_carlo(function, darts, start, end)
+        sum += abs(1 - Decimal(result['integration'])/Decimal(true_value))
+    return (sum / Decimal(runs)) * 100
+
+def average_time(function, darts, start, end, runs):
+    sum = 0
+    for i in range(runs):
+        start = time.clock()
+        monte_carlo(function, darts, start, end)
+        end = time.clock()
+        sum += abs(end - start)
+    return (sum / runs)
+
+        
+
         
 
