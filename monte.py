@@ -2,7 +2,10 @@ import random as rand
 import math
 from decimal import *
 import time
+from numpy import *
+import sys
 
+# basic monte carlo integration 
 def monte_carlo(function, darts, start, end):
     runs = darts
     points = []
@@ -10,20 +13,31 @@ def monte_carlo(function, darts, start, end):
     # base of A' from a -> b
     a = start
     b = end
-    # height of enclosed box base -> height
-    height = function(b)
+    
+    # top of the 'dartboard'
+    top = get_max_value(function, a, b)
+    # bottom of the 'dartboard'
+    bottom = get_min_value(function, a, b)
+    
     
     # generate random x and y; check if y value is bounded by f(x) or not
+    # counting array: x-position, y-position, bounded by curve (bool)
     for i in range(runs):
         x = a  + rand.random() * (b-a)
-        y = rand.random() * height
-        if y <= function(x):
-            points.append([x,y,True])
-        else:
-            points.append([x,y,False])
+        y = rand.random() * abs(top-bottom) + bottom
+        if y >= 0:
+            if y <= function(x):
+                points.append([x,y,True])
+            else:
+                points.append([x,y,False])
+        if y < 0:
+            if y >= function(x):
+                points.append([x,y,True])
+            else:
+                points.append([x,y,False])
 
     area = 0
-    area_prime = b * height
+    area_prime = abs(b-a) * abs(top-bottom)
     points_within = 0
     points_outside = 0
     
@@ -57,6 +71,51 @@ def monte_carlo(function, darts, start, end):
                 integration=area,
                 darts=runs)
 
+# monte carlo integration for function that is both negative and positive
+def monte_carlo_neg(function, darts, start, end):
+    # create arrays for return
+    x_points_in, y_points_in, x_points_out, y_points_out = ([] for i in range(4))
+    # total bounded area
+    bounded_area = 0
+    # find the zeroes to break into multiple functions
+    zeroes = find_zeroes(function, start, end)
+    zeroes.append(start)
+    zeroes.append(end)
+    zeroes = sorted(zeroes)
+    for i in range(len(zeroes)-1):
+        a = zeroes[i] 
+        b = zeroes[i+1]
+        mid = (a + b)/2
+        result = monte_carlo(function, darts/len(zeroes), a, b)
+        
+        if (function(mid) >= 0):
+            bounded_area += result['integration']
+        else:
+            bounded_area -= result['integration']
+            
+        x_points_in +=  result['x_points_in']
+        y_points_in +=  result['y_points_in']
+        x_points_out +=  result['x_points_out']
+        y_points_out +=  result['y_points_out']
+        
+    return dict(x_points_in=x_points_in, 
+                y_points_in=y_points_in, 
+                x_points_out=x_points_out, 
+                y_points_out=y_points_out,
+                integration=bounded_area,
+                darts=darts)
+
+# using average value theorem and monte-carlo method to evaluate integral
+def monte_carlo_avg_val(function, points, start, end):
+    
+
+# left hand riemann sum (boolean for right hand)
+
+# midpoint riemann sum
+
+# simpsons rule
+    
+         
 def average_error(function, darts, start, end, runs, true_value):
     sum = 0
     for i in range(runs):
@@ -73,7 +132,34 @@ def average_time(function, darts, start, end, runs):
         sum += abs(end - start)
     return (sum / runs)
 
-        
+def get_max_value(func, start, end):
+    numlist = arange(start, end, 0.001)
+    max_value = -sys.maxint - 1
+    numlist = map(func, numlist)
+    for num in numlist:
+        if num >= max_value:
+            max_value = num
+    return max_value
+
+def get_min_value(func, start, end):
+    numlist = arange(start, end, 0.001)
+    min_value = sys.maxint
+    numlist = map(func, numlist)
+    for num in numlist:
+        if num <= min_value:
+            min_value = num
+    return min_value
+    
+def find_zeroes(function, start, end):
+    num_range = arange(start, end, 0.0001)
+    zeroes = []
+    for num in num_range:
+        if function(num) * function(num-0.0001) < 0:
+            zeroes.append((num + num-0.0001)/2)
+    return zeroes
+
+
+            
 
         
 
