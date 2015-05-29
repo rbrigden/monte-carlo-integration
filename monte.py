@@ -71,7 +71,7 @@ def monte_carlo(function, darts, start, end):
                 integration=area,
                 darts=runs)
 
-# monte carlo integration for function that is both negative and positive
+# monte carlo integration for function that is both negative and positive between the interval
 def monte_carlo_neg(function, darts, start, end):
     # create arrays for return
     x_points_in, y_points_in, x_points_out, y_points_out = ([] for i in range(4))
@@ -106,14 +106,57 @@ def monte_carlo_neg(function, darts, start, end):
                 darts=darts)
 
 # using average value theorem and monte-carlo method to evaluate integral
-def monte_carlo_avg_val(function, points, start, end):
+def monte_carlo_avg_val(function, runs, start, end):
+    # value lists
+    x_values = []
+    y_values = []
     
+    # total for calc of average value
+    total = 0
+    
+    # bounds of integration
+    a = start
+    b = end
+    
+    # generate random x values and calculate function values
+    # Append data to value lists
+    for i in range(runs):
+        x = a  + rand.random() * (b-a)
+        x_values.append(x)
+        y_values.append(function(x))
+        
+    for val in y_values:
+        total += val
+        
+    # average function value
+    average = total / len(y_values)
+    
+    return average * abs(b-a)
 
-# left hand riemann sum (boolean for right hand)
-
-# midpoint riemann sum
-
+# riemann sum (type = [righthand, lefthand, midpoint)
+def riemann_sum(function, divisions, start, end, method):
+    x = start
+    area = 0
+    dx = Decimal(abs(start-end)) / Decimal(divisions)
+    if method == 'lefthand':
+        for i in range(divisions):
+            area += dx * function(x)
+            x += dx
+    elif method == 'righthand':
+        for i in range(divisions):
+            x += dx
+            area += dx * function(x)
+    elif method == 'midpoint':
+        for i in range(divisions):
+            x += dx
+            area += dx * function(x + dx/2)
+    else:
+        return "error, method fault [lefthand, righthand or midpoint]"
+    return area
+        
 # simpsons rule
+def simpsons(function, divisions, start, end)
+    x = start
     
          
 def average_error(function, darts, start, end, runs, true_value):
