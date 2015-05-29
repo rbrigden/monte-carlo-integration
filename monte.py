@@ -137,26 +137,24 @@ def monte_carlo_avg_val(function, runs, start, end):
 def riemann_sum(function, divisions, start, end, method):
     x = start
     area = 0
+    division = 1.0 * divisions
     dx = Decimal(abs(start-end)) / Decimal(divisions)
     if method == 'lefthand':
         for i in range(divisions):
-            area += dx * function(x)
+            area += dx * Decimal(function(x))
             x += dx
     elif method == 'righthand':
         for i in range(divisions):
             x += dx
-            area += dx * function(x)
+            area += dx * Decimal(function(x))
     elif method == 'midpoint':
         for i in range(divisions):
+            area += dx * Decimal(function(x + dx/2))
             x += dx
-            area += dx * function(x + dx/2)
     else:
         return "error, method fault [lefthand, righthand or midpoint]"
     return area
-        
-# simpsons rule
-def simpsons(function, divisions, start, end)
-    x = start
+
     
          
 def average_error(function, darts, start, end, runs, true_value):
@@ -200,6 +198,8 @@ def find_zeroes(function, start, end):
         if function(num) * function(num-0.0001) < 0:
             zeroes.append((num + num-0.0001)/2)
     return zeroes
+
+
 
 
             
